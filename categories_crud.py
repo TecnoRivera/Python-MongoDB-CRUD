@@ -1,100 +1,71 @@
-# categories_crud.py
+import pymongo
 from tkinter import *
 from tkinter import messagebox, ttk
-import pymongo
+
 from bson.objectid import ObjectId
 
 HOST = "localhost"
 PORT = "27017"
 TIMEOUT = 1000
-
-URI = "mongodb://" + HOST + ":" + PORT + "/"
+URI = f"mongodb://{HOST}:{PORT}/"
 BD = "blog"
-COLLECTION = "categories" 
+COLLECTION = "categories"
 
 client = pymongo.MongoClient(URI, serverSelectionTimeoutMS=TIMEOUT)
 database = client[BD]
 collection = database[COLLECTION]
 
-def mostrarCategorias():
-    try:
-        for document in collection.find():
-            table.insert('', 0, text=document["_id"], values=(document["name"], document["url"]))
-    except pymongo.errors.ServerSelectionTimeoutError as err:
-        print("Tiempo excedido:", err)
-    except pymongo.errors.ConnectionFailure as err:
-        print("Error de conexión a MongoDB:", err)
-
-def addCategory():
-    if len(name.get()) != 0 and len(url.get()) != 0:
+def addCategory(category_name, category_url):
+    if category_name:
         try:
-            document = {"name": name.get(), "url": url.get()}
-            collection.insert_one(document)
+            category = {"name": category_name, "url": category_url}
+            result = collection.insert_one(category)
+            print("Categoría agregada con éxito.")
         except pymongo.errors.ConnectionFailure as err:
             print("Error:", err)
-    mostrarCategorias()
+    else:
+        messagebox.showerror("Error", "El campo 'Category Name' no puede estar vacío")
 
-def editCategory():
-    global ID_CATEGORY
-    if len(name.get()) != 0 and len(url.get()) != 0:
-        try:
-            idSearch = {"_id": ObjectId(ID_CATEGORY)}
-            newValues = {"$set": {"name": name.get(), "url": url.get()}}
-            collection.update_one(idSearch, newValues)
-            name.delete(0, END)
-            url.delete(0, END)
-        except pymongo.errors.ConnectionFailure as err:
-            print("Error:", err)
-    mostrarCategorias()
-
-def deleteCategory():
-    global ID_CATEGORY
+def displayCategories(table):
+    """Función para mostrar las categorías en la tabla"""
     try:
-        idSearch = {"_id": ObjectId(ID_CATEGORY)}
-        collection.delete_one(idSearch)
+        registers = table.get_children()
+        for register in registers:
+            table.delete(register)
+        
+        documents = collection.find()
+        for document in documents:
+            category_name = document.get("name", "No name")
+            category_url = document.get("url", "No URL")
+            table.insert('', 'end', text=document["_id"], values=(category_name, category_url))
     except pymongo.errors.ConnectionFailure as err:
-        print("Error:", err)
-    mostrarCategorias()
+        print("Error al obtener categorías:", err)
 
-def doubleClickTable(event):
-    global ID_CATEGORY
-    ID_CATEGORY = str(table.item(table.selection())["text"])
-    document = collection.find({"_id": ObjectId(ID_CATEGORY)})[0]
-    name.delete(0, END)
-    name.insert(0, document["name"])
-    url.delete(0, END)
-    url.insert(0, document["url"])
-    create["state"] = "disabled"
-    edit["state"] = "normal"
-    delete["state"] = "normal"
+def createCategoryInterface(window):
+    """Crea la interfaz gráfica para gestionar categorías"""
+    Label(window, text="Category Name").grid(row=0, column=0, padx=10, pady=5)
+    category_name = Entry(window)
+    category_name.grid(row=0, column=1, padx=10, pady=5)
+
+    Label(window, text="Category URL").grid(row=1, column=0, padx=10, pady=5)
+    category_url = Entry(window)
+    category_url.grid(row=1, column=1, padx=10, pady=5)
+
+    create_button = Button(window, text="Add Category", command=lambda: addCategory(category_name.get(), category_url.get()), bg="green", fg="white")
+    create_button.grid(row=2, columnspan=2, pady=10)
+
+    table = ttk.Treeview(window, columns=("name", "url"))
+    table.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+    table.heading("#0", text="ID") 
+    table.heading("name", text="Category Name")  
+    table.heading("url", text="Category URL") 
+    table.column("#0", width=100, stretch=False)  
+    table.column("name", width=200, stretch=True)  
+    table.column("url", width=200, stretch=True)  
+
+    displayCategories(table)
 
 window = Tk()
-table = ttk.Treeview(window, columns=("name", "url"))
-table.grid(row=0, column=0, columnspan=2)
-table.heading("#0", text="ID")
-table.heading("name", text="Name")
-table.heading("url", text="URL")
-table.bind("<Double-1>", doubleClickTable)
-
-Label(window, text="Name").grid(row=1, column=0)
-name = Entry(window)
-name.grid(row=1, column=1, sticky=W+E)
-
-Label(window, text="URL").grid(row=2, column=0)
-url = Entry(window)
-url.grid(row=2, column=1, sticky=W+E)
-
-create = Button(window, text="Add Category", command=addCategory, bg="green")
-create.grid(row=3, columnspan=2, sticky=W+E)
-
-edit = Button(window, text="Edit Category", command=editCategory, bg="yellow")
-edit.grid(row=4, columnspan=2, sticky=W+E)
-edit["state"] = "disabled"
-
-delete = Button(window, text="Delete Category", command=deleteCategory, bg="red", fg="white")
-delete.grid(row=5, columnspan=2, sticky=W+E)
-delete["state"] = "disabled"
-
-mostrarCategorias()
-
+window.title("Gestión de Categorías")
+createCategoryInterface(window)
 window.mainloop()
