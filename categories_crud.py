@@ -27,7 +27,7 @@ def addCategory(category_name, category_url):
         messagebox.showerror("Error", "El campo 'Category Name' no puede estar vacío")
 
 def displayCategories(table):
-    """Función para mostrar las categorías en la tabla"""
+
     try:
         registers = table.get_children()
         for register in registers:
@@ -42,7 +42,7 @@ def displayCategories(table):
         print("Error al obtener categorías:", err)
 
 def createCategoryInterface(window):
-    """Crea la interfaz gráfica para gestionar categorías"""
+
     Label(window, text="Category Name").grid(row=0, column=0, padx=10, pady=5)
     category_name = Entry(window)
     category_name.grid(row=0, column=1, padx=10, pady=5)

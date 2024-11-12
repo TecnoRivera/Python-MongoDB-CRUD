@@ -15,7 +15,7 @@ database = client[BD]
 collection = database[COLLECTION]
 
 def addTag(tag_Name, tag_Url):
-    """Agregar un nuevo tag a la base de datos"""
+
     if tag_Name and tag_Url:
         try:
             tag = {"name": tag_Name, "url": tag_Url}
@@ -27,7 +27,7 @@ def addTag(tag_Name, tag_Url):
         messagebox.showerror("Error", "El campo 'Tag Name' y 'Tag URL' no pueden estar vacíos")
 
 def displayTags(table):
-    """Función para mostrar los tags en la tabla"""
+
     try:
         registers = table.get_children()
         for register in registers:
@@ -42,7 +42,7 @@ def displayTags(table):
         print("Error al obtener tags:", err)
 
 def createTagInterface(window):
-    """Crea la interfaz gráfica para gestionar tags"""
+
     Label(window, text="Tag Name").grid(row=0, column=0, padx=10, pady=5)
     tag_name = Entry(window)
     tag_name.grid(row=0, column=1, padx=10, pady=5)

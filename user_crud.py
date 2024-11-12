@@ -102,7 +102,6 @@ def doubleClickTable(event):
     else:
         print("No se encontró el documento con el ID:", selected_user_id)
 
-# Tkinter Interface
 window = Tk()
 window.title("Gestión de Usuarios")
 

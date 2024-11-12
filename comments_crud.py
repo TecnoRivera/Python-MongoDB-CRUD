@@ -15,7 +15,7 @@ database = client[BD]
 collection = database[COLLECTION]
 
 def addComment(comment_name, comment_url, article_id):
-    """Agrega un comentario con nombre, URL y ID de artículo."""
+
     if comment_name and comment_url:
         try:
             try:
@@ -37,7 +37,7 @@ def addComment(comment_name, comment_url, article_id):
         messagebox.showerror("Error", "Los campos 'Name' y 'URL' no pueden estar vacíos.")
 
 def displayComments(table, article_id):
-    """Muestra los comentarios en la tabla vinculados a un artículo específico."""
+    
     try:
         registers = table.get_children()
         for register in registers:
@@ -58,7 +58,7 @@ def displayComments(table, article_id):
         print("Error al obtener comentarios:", err)
 
 def createCommentInterface(window, article_id):
-    """Crea la interfaz gráfica para gestionar comentarios."""
+
     Label(window, text="Comment Name").grid(row=0, column=0, padx=10, pady=5)
     comment_name = Entry(window)
     comment_name.grid(row=0, column=1, padx=10, pady=5)
@@ -70,7 +70,7 @@ def createCommentInterface(window, article_id):
     create_button = Button(window, text="Add Comment", command=lambda: addComment(comment_name.get(), comment_url.get(), article_id), bg="green", fg="white")
     create_button.grid(row=2, columnspan=2, pady=10)
 
-    # Crear la tabla con las columnas definidas correctamente
+
     table = ttk.Treeview(window, columns=("name", "url"))
     table.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
     table.heading("#0", text="ID") 
