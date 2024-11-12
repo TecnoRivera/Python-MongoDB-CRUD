@@ -1,4 +1,3 @@
-#comments_crud.py
 import pymongo
 from tkinter import *
 from tkinter import messagebox, ttk
@@ -19,10 +18,16 @@ def addComment(comment_name, comment_url, article_id):
     """Agrega un comentario con nombre, URL y ID de artículo."""
     if comment_name and comment_url:
         try:
+            try:
+                article_id_obj = ObjectId(article_id)
+            except Exception as e:
+                messagebox.showerror("Error", "ID de artículo no válido.")
+                return
+            
             comment = {
                 "name": comment_name,
                 "url": comment_url,
-                "article_id": ObjectId(article_id)
+                "article_id": article_id_obj
             }
             collection.insert_one(comment)
             print("Comentario agregado con éxito.")
@@ -38,7 +43,13 @@ def displayComments(table, article_id):
         for register in registers:
             table.delete(register)
 
-        documents = collection.find({"article_id": ObjectId(article_id)})
+        try:
+            article_id_obj = ObjectId(article_id)
+        except Exception as e:
+            messagebox.showerror("Error", "ID de artículo no válido.")
+            return
+
+        documents = collection.find({"article_id": article_id_obj})
         for document in documents:
             comment_name = document.get("name", "No name")
             comment_url = document.get("url", "No URL")
@@ -59,6 +70,7 @@ def createCommentInterface(window, article_id):
     create_button = Button(window, text="Add Comment", command=lambda: addComment(comment_name.get(), comment_url.get(), article_id), bg="green", fg="white")
     create_button.grid(row=2, columnspan=2, pady=10)
 
+    # Crear la tabla con las columnas definidas correctamente
     table = ttk.Treeview(window, columns=("name", "url"))
     table.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
     table.heading("#0", text="ID") 
@@ -72,5 +84,12 @@ def createCommentInterface(window, article_id):
 
 window = Tk()
 window.title("Gestión de Comentarios")
-createCommentInterface(window, "some_article_id")  
+
+article = collection.find_one()  
+if article:
+    article_id = str(article["_id"]) 
+else:
+    article_id = str(ObjectId())  
+
+createCommentInterface(window, article_id)
 window.mainloop()
