@@ -13,6 +13,7 @@ COLLECTION = "users"
 client = pymongo.MongoClient(URI, serverSelectionTimeoutMS=TIMEOUT)
 database = client[BD]
 colection = database[COLLECTION]
+
 def mostrarDatos(name="", email=""):
     objectSearch={}
     if len(name) != 0:
@@ -29,6 +30,7 @@ def mostrarDatos(name="", email=""):
         print("Time exceed",err)
     except pymongo.errors.ConnectionFailure as err:
         print("Fail trying to connect to Mongodb",err)
+
 def addUser():
     if len(name.get())!=0 and len(email.get())!=0:
         try:
@@ -41,6 +43,7 @@ def addUser():
     else:
         messagebox.showerror(message="Los campos no pueden estar vacios")
     mostrarDatos()
+
 def doubleClickTable(event):
     global ID_USER
     ID_USER=str(table.item(table.selection())["text"])
@@ -91,8 +94,8 @@ window = Tk()
 table = ttk.Treeview(window, columns=("email", "name"))
 table.grid(row=1, column=0, columnspan=2)
 table.heading("#0", text="ID")
-table.heading("#1", text="EMAIL")
-table.heading("#2", text="NAME")
+table.heading("#1", text="NAME")
+table.heading("#2", text="EMAIL")
 table.bind("<Double-Button-1>", doubleClickTable)
 def on_closing():
     client.close()

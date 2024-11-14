@@ -5,7 +5,8 @@ def open_users_crud():
     subprocess.Popen(["python", "user_crud.py"])
 
 def open_articles_crud():
-    subprocess.Popen(["python", "article_crud.py"])
+    """ subprocess.Popen(["python", "article_crud.py"]) """
+    subprocess.Popen(["python", "new_article.py"])
 
 def open_comments_crud():
     subprocess.Popen(["python", "comments_crud.py"])
