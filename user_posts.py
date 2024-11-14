@@ -18,12 +18,13 @@ database = client[BD]
 collection = database[COLLECTION]
 
 current_user = None
+ui_table = None
 
-
-def mostrarDatos(table):
+def mostrarDatos():
     try:
         for document in collection.find({"belongs_to": current_user}):
-            table.insert('', 0, text=document["_id"], values=(document["title"], document["date"], document["text"]))
+            ui_table.insert('', 0, text=document["_id"], values=(document["title"], document["date"], document["text"]))
+            pass
     except pymongo.errors.ServerSelectionTimeoutError as err:
         print("Time exceed", err)
     except pymongo.errors.ConnectionFailure as err:
@@ -32,13 +33,13 @@ def mostrarDatos(table):
 
 def create_window():
     window = Tk()
-    table = ttk.Treeview(window, columns=("title", "date", "text"))
-    table.grid(row=0, column=0, columnspan=2)
-    table.heading("#0", text="ID")
-    table.heading("title", text="Title")
-    table.heading("date", text="Date")
-    table.heading("text", text="Text")
-    table.bind("<Double-1>", doubleClickTable)
+    ui_table = ttk.Treeview(window, columns=("title", "date", "text"))
+    ui_table.grid(row=0, column=0, columnspan=2)
+    ui_table.heading("#0", text="ID")
+    ui_table.heading("title", text="Title")
+    ui_table.heading("date", text="Date")
+    ui_table.heading("text", text="Text")
+    ui_table.bind("<Double-1>", doubleClickTable)
 
     Label(window, text="Title").grid(row=1, column=0)
     title = Entry(window)
@@ -62,7 +63,7 @@ def create_window():
     delete = Button(window, text="Delete Article", command=deleteArticle, bg="red", fg="white")
     delete.grid(row=6, columnspan=2, sticky=W+E)
     delete["state"] = "disabled"
-    mostrarDatos(table)
+    mostrarDatos(ui_table)
 
     window.mainloop()
 
