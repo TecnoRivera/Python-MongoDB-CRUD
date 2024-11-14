@@ -5,7 +5,7 @@ def open_users_crud():
     subprocess.Popen(["python", "user_crud.py"])
 
 def open_articles_crud():
-    
+
     subprocess.Popen(["python", "new_article.py"])
 
 def open_comments_crud():
@@ -26,8 +26,8 @@ window_height = 400
 screen_width = window.winfo_screenwidth()
 screen_height = window.winfo_screenheight()
 
-x_position = (screen_width - window_width) // 2
-y_position = (screen_height - window_height) // 2
+x_position = (screen_width - window_width) 
+y_position = (screen_height - window_height) 
 
 window.geometry(f"{window_width}x{window_height}+{x_position}+{y_position}")
 
