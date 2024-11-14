@@ -10,8 +10,8 @@ URI = f"mongodb://{HOST}:{PORT}/"
 BD = "blog"
 COLLECTION_CATEGORIES = "categories"
 COLLECTION_ARTICLES = "articles"
-COLLECTION_ARTICLE_CATEGORIES = "article_categories"  
-COLLECTION_USERS = "users"  
+COLLECTION_ARTICLE_CATEGORIES = "article_categories"
+COLLECTION_USERS = "users"
 
 client = pymongo.MongoClient(URI, serverSelectionTimeoutMS=TIMEOUT)
 database = client[BD]
@@ -48,6 +48,31 @@ def addCategoryToArticle(article_id, category_id):
         print("Categoría asociada al artículo con éxito.")
     except pymongo.errors.ConnectionFailure as err:
         print("Error:", err)
+
+def deleteCategory(category_id, table):
+    try:
+        result = categories_collection.delete_one({"_id": ObjectId(category_id)})
+        if result.deleted_count > 0:
+            messagebox.showinfo("Eliminado", "Categoría eliminada con éxito.")
+            displayCategories(table)
+        else:
+            messagebox.showerror("Error", "No se pudo eliminar la categoría.")
+    except pymongo.errors.ConnectionFailure as err:
+        print("Error al eliminar la categoría:", err)
+
+def editCategory(category_id, new_name, new_url, table):
+    try:
+        result = categories_collection.update_one(
+            {"_id": ObjectId(category_id)},
+            {"$set": {"name": new_name, "url": new_url}}
+        )
+        if result.modified_count > 0:
+            messagebox.showinfo("Editado", "Categoría editada con éxito.")
+            displayCategories(table)
+        else:
+            messagebox.showerror("Error", "No se pudo editar la categoría.")
+    except pymongo.errors.ConnectionFailure as err:
+        print("Error al editar la categoría:", err)
 
 def displayCategories(table):
     try:
@@ -104,10 +129,33 @@ def createCategoryInterface(window):
     
     displayCategories(table)
 
-    Label(window, text="Assign Category to Article").grid(row=5, column=0, padx=10, pady=5)
+    def on_delete():
+        selected_item = table.selection()
+        if selected_item:
+            category_id = table.item(selected_item)["text"]
+            deleteCategory(category_id, table)
+
+    def on_edit():
+        selected_item = table.selection()
+        if selected_item:
+            category_id = table.item(selected_item)["text"]
+            new_name = category_name.get()
+            new_url = category_url.get()
+            if new_name and new_url:
+                editCategory(category_id, new_name, new_url, table)
+            else:
+                messagebox.showerror("Error", "Los campos 'Category Name' y 'Category URL' no pueden estar vacíos.")
+
+    delete_button = Button(window, text="Delete Category", command=on_delete, bg="red", fg="white")
+    delete_button.grid(row=5, column=0, pady=10)
+
+    edit_button = Button(window, text="Edit Category", command=on_edit, bg="blue", fg="white")
+    edit_button.grid(row=5, column=1, pady=10)
+
+    Label(window, text="Assign Category to Article").grid(row=6, column=0, padx=10, pady=5)
     
     article_table = ttk.Treeview(window, columns=("title"))
-    article_table.grid(row=6, column=0, columnspan=2, padx=10, pady=10)
+    article_table.grid(row=7, column=0, columnspan=2, padx=10, pady=10)
     article_table.heading("#0", text="ID")
     article_table.heading("title", text="Article Title")
     article_table.column("#0", width=100, stretch=False)
