@@ -6,7 +6,7 @@ import pymongo
 import user_posts
 from bson.objectid import ObjectId
 
-HOST = "localhost"
+HOST = "localhost" 
 PORT = "27017"
 TIMEOUT = 1000
 

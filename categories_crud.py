@@ -20,6 +20,40 @@ articles_collection = database[COLLECTION_ARTICLES]
 article_categories_collection = database[COLLECTION_ARTICLE_CATEGORIES]
 users_collection = database[COLLECTION_USERS]
 
+
+article_id = None
+
+current_article = None
+ui_table = None
+title = None
+date = None
+text = None
+create = None
+edit = None
+delete = None
+
+
+def create_window():
+    window = Tk()
+    window.title("Gestión de Categorías")
+    createCategoryInterface(window)
+    window.mainloop()
+
+
+def show_article_categories(selected_id):
+    global current_article
+
+    current_article = selected_id
+    print(f"Showing tags for article: {current_article}")
+
+    create_window();
+
+
+
+
+
+
+
 def addCategory(category_name, category_url, user_email):
     user = users_collection.find_one({"email": user_email})
     if not user:
@@ -28,7 +62,7 @@ def addCategory(category_name, category_url, user_email):
 
     if category_name:
         try:
-            category = {"name": category_name, "url": category_url, "user_id": user["_id"]}
+            category = {"name": category_name, "url": category_url, "user_id": user["_id"], "belongs_to": current_article}
             result = categories_collection.insert_one(category)
             print("Categoría agregada con éxito.")
         except pymongo.errors.ConnectionFailure as err:
@@ -42,7 +76,8 @@ def addCategoryToArticle(article_id, category_id):
         category_id_obj = ObjectId(category_id)
         relationship = {
             "article_id": article_id_obj,
-            "category_id": category_id_obj
+            "category_id": category_id_obj, 
+            "belongs_to": current_article
         }
         article_categories_collection.insert_one(relationship)
         print("Categoría asociada al artículo con éxito.")
@@ -80,7 +115,7 @@ def displayCategories(table):
         for register in registers:
             table.delete(register)
         
-        documents = categories_collection.find()
+        documents = categories_collection.find({"belongs_to": current_article})
         for document in documents:
             category_name = document.get("name", "No name")
             category_url = document.get("url", "No URL")
@@ -170,7 +205,4 @@ def createCategoryInterface(window):
 
     article_table.bind("<Double-1>", on_article_select)
 
-window = Tk()
-window.title("Gestión de Categorías")
-createCategoryInterface(window)
-window.mainloop()
+

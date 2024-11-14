@@ -20,6 +20,36 @@ articles_collection = database[COLLECTION_ARTICLES]
 article_tags_collection = database[COLLECTION_ARTICLE_TAGS]
 users_collection = database[COLLECTION_USERS]
 
+
+article_id = None
+
+current_article = None
+ui_table = None
+title = None
+date = None
+text = None
+create = None
+edit = None
+delete = None
+
+
+def create_window():
+    window = Tk()
+    window.title("Gestión de Tags")
+    createTagInterface(window)
+    window.mainloop()
+
+
+def show_article_tags(selected_id):
+    global current_article
+
+    current_article = selected_id
+    print(f"Showing tags for article: {current_article}")
+
+    create_window();
+
+
+
 def addTag(tag_Name, tag_Url, user_email):
     user = users_collection.find_one({"email": user_email})
     if not user:
@@ -28,7 +58,7 @@ def addTag(tag_Name, tag_Url, user_email):
 
     if tag_Name and tag_Url:
         try:
-            tag = {"name": tag_Name, "url": tag_Url, "user_id": user["_id"]}
+            tag = {"name": tag_Name, "url": tag_Url, "user_id": user["_id"], "belongs_to": current_article}
             result = tags_collection.insert_one(tag)
             print("Tag agregado con éxito.")
         except pymongo.errors.ConnectionFailure as err:
@@ -42,7 +72,8 @@ def addTagToArticle(article_id, tag_id):
         tag_id_obj = ObjectId(tag_id)
         relationship = {
             "article_id": article_id_obj,
-            "tag_id": tag_id_obj
+            "tag_id": tag_id_obj, 
+            "belongs_to": current_article
         }
         article_tags_collection.insert_one(relationship)
         print("Tag asociado al artículo con éxito.")
@@ -80,7 +111,7 @@ def displayTags(table):
         for register in registers:
             table.delete(register)
         
-        documents = tags_collection.find()
+        documents = tags_collection.find({"belongs_to": current_article})
         for document in documents:
             tag_Name = document.get("name", "No name")
             tag_Url = document.get("url", "No URL")
@@ -170,7 +201,4 @@ def createTagInterface(window):
 
     article_table.bind("<Double-1>", on_article_select)
 
-window = Tk()
-window.title("Gestión de Tags")
-createTagInterface(window)
-window.mainloop()
+
